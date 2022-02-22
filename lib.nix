@@ -21,7 +21,7 @@ let
       (flattenBuildInputs deps));
   depLibs = deps: builtins.concatStringsSep " " (map (d: "${d}/lib/lib${d.pname}.so") deps);
   phases = [ "unpackPhase" "patchPhase" "buildPhase" "installPhase" ];
-  installPhase = ''
+  defaultInstallPhase = ''
     mv ${dirs.build} $out
   '';
   dirs = {
@@ -34,22 +34,16 @@ let
 in
 rec {
   swiftPlatforms = [ "x86_64-linux" ];
-  # Set of types of target like { x = "x" } users can use to catch potential typos of "a".
-  TargetType = builtins.foldl'
-    (set: val: { "${val}" = val; } // set)
-    { }
-    [ "CLibrary" "Library" "Executable" ]
-  ;
 
   mkDynamicCLibrary =
     pkgs:
-    { package
-    , version
+    { version
     , src
     , target
     , srcRoot ? "Sources/${target}"
     , buildInputs ? [ ]
     , patchPhase ? ""
+    , installPhase ? defaultInstallPhase
     , extraCompilerFlags ? ""
     ,
     }:
@@ -96,13 +90,13 @@ rec {
 
   mkDynamicLibrary =
     pkgs:
-    { package
-    , version
+    { version
     , src
     , target
     , srcRoot ? "Sources/${target}"
     , buildInputs ? [ ]
     , patchPhase ? ""
+    , installPhase ? defaultInstallPhase
     , extraCompilerFlags ? ""
     ,
     }:
@@ -147,6 +141,7 @@ rec {
     , srcRoot ? "Sources/${target}"
     , buildInputs ? [ ]
     , patchPhase ? ""
+    , installPhase ? defaultInstallPhase
     , extraCompilerFlags ? ""
     ,
     }:
